@@ -14,7 +14,7 @@ E.g.
 '''
 # from .imagej_funs import *
 # from .image_preprocessing import *
-# from .cell_segmentation import *
+# from .cell_detection import *
 # from .animations import *
 # from .io import *
 
@@ -30,7 +30,7 @@ or
 from . import image_preprocessing
 from . import imagej_funs
 from . import io
-from . import cell_segmentation
+from . import cell_detection
 from . import animations
 
 from . import luxendo
