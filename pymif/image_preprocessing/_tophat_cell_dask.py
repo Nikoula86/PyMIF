@@ -1,4 +1,3 @@
-import pyclesperanto_prototype as cle
 import numpy as np
 import dask.array as da
 from _tophat_cell import tophat_cell
@@ -41,8 +40,7 @@ def tophat_cell_dask(
                     cell_diameter=
                     np.array(cell_diameter),
                     scale=scale, 
-                    depth=overlap, 
-                    trim=False)
+                    depth=overlap)
     result = tile_map.compute()
 
     return result
