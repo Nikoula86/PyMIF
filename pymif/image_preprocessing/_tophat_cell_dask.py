@@ -31,14 +31,15 @@ def tophat_cell_dask(
     
     '''
 
-    print(input_image.shape)
+    cell_diameter = np.array(cell_diameter)
+    
+#     print(input_image.shape)
     tiles = da.from_array(input_image, chunks=chunk_size)
 
     tile_map = da.map_overlap(
                     tophat_cell, 
                     tiles,
-                    cell_diameter=
-                    np.array(cell_diameter),
+                    cell_diameter=cell_diameter,
                     scale=scale, 
                     depth=overlap)
     result = tile_map.compute()
@@ -48,13 +49,15 @@ def tophat_cell_dask(
 if __name__ == '__main__':
     print('ciao')
 
-    img = np.zeros((512,512,512))
+    input_image = 256*np.random.rand(512,512,512)
+    print(input_image.shape)
     result = tophat_cell_dask(
-        img, 
+        input_image, 
         chunk_size=(128,128,128), 
         overlap=(16,16,16), 
         cell_diameter=(8,8,8)
         )
 
     print(result)
+    print(result.shape)
     

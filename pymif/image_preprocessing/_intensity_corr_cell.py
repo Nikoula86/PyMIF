@@ -10,11 +10,12 @@ def intensity_corr_cell(
     '''
     Divide the image by its gaussian blur version with a sigma equal to "scale" times "cell_diameter".
     '''
+
+    cell_diameter = np.array(cell_diameter)
     
     input_gpu = cle.push(input_image)
 
     # perform intensity correction
-    s = 50.
     blurred_gpu = cle.gaussian_blur(
         input_gpu, 
         sigma_x=cell_diameter[2]*scale, 
@@ -24,9 +25,9 @@ def intensity_corr_cell(
     blurred_gpu = blurred_gpu/float(np.mean(blurred_gpu))
     output_gpu = cle.divide_images(input_gpu, blurred_gpu)
 
-    output_image = cle.pull(output_gpu)
-    blurred = cle.pull(blurred_gpu)
+    # output_image = cle.pull(output_gpu)
+    # blurred = cle.pull(blurred_gpu)
 
-    del input_gpu, output_gpu, blurred_gpu
+    del input_gpu, blurred_gpu
 
-    return output_image, blurred
+    return cle.pull(output_gpu)

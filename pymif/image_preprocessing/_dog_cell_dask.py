@@ -1,6 +1,7 @@
 import numpy as np
 import dask.array as da
 from _dog_cell import dog_cell
+import pyclesperanto_prototype as cle
 
 def dog_cell_dask(
         input_image, 
@@ -33,29 +34,36 @@ def dog_cell_dask(
 
     cell_diameter = np.array(cell_diameter)
     
-    print(input_image.shape)
+    # print(input_image.shape)
     tiles = da.from_array(input_image, chunks=chunk_size)
+    # print(tiles)
 
     tile_map = da.map_overlap(
                     dog_cell, 
                     tiles,
-                    cell_diameter=np.array(cell_diameter),
+                    cell_diameter=cell_diameter,
                     large_scale=large_scale, 
                     small_scale=small_scale,
-                    depth=overlap)
+                    depth=overlap,
+                    trim=True
+                    )
+    # print('////////////////////////////////////////')
     result = tile_map.compute()
+    # print(result.shape)
 
     return result
 
 if __name__ == '__main__':
     print('ciao')
 
-    input_image = 256*np.random.rand(512,512,512)
+    input_image = (256*np.random.rand(512,512,512)).astype(np.uint16)
+    print(input_image.shape)
     result = dog_cell_dask(
         input_image, 
         chunk_size=(128,128,128), 
         overlap=(16,16,16), 
-        cell_diameter=(8,8,8)
+        cell_diameter=(2,2,2)
         )
 
     print(result)
+    print(result.shape)

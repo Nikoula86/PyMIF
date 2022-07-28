@@ -25,4 +25,4 @@ def tophat_cell(
     img_gpu = None
 
     # print('Done.')
-    return img_tophat
+    return cle.pull(img_tophat)
