@@ -1,6 +1,6 @@
 import numpy as np
 import dask.array as da
-from _dog_cell import dog_cell
+from ._dog_cell import dog_cell
 import pyclesperanto_prototype as cle
 
 def dog_cell_dask(

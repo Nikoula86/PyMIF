@@ -1,6 +1,6 @@
 import numpy as np
 import dask.array as da
-from _intensity_corr_cell import intensity_corr_cell
+from ._intensity_corr_cell import intensity_corr_cell
 
 def intensity_corr_cell_dask(
     input_image, 

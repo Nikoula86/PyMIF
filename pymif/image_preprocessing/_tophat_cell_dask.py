@@ -1,6 +1,6 @@
 import numpy as np
 import dask.array as da
-from _tophat_cell import tophat_cell
+from ._tophat_cell import tophat_cell
 
 def tophat_cell_dask(
                     input_image, 
