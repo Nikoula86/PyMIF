@@ -5,7 +5,6 @@ import pandas as pd
 from ...imagej_funs._make_lut import make_lut
 from ...imagej_funs._imagej_metadata_tags import imagej_metadata_tags
 
-
 def compile_conditions_multifields(path, 
                                           channel_order, 
                                           luts_name, 

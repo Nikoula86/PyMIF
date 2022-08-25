@@ -25,7 +25,6 @@ with these lines only, one can access the functions with:
 or
 >>> import pymif.image_preprocessing as pmpre
 >>> pmpre.normalize
-
 '''
 from . import image_preprocessing
 from . import imagej_funs

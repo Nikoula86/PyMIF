@@ -6,7 +6,7 @@ import os
 
 def xml2csv(exp_folder):
 
-    xtree = et.parse(os.path.join(folder_raw, exp_folder, "Images", "Index.idx.xml"))
+    xtree = et.parse(os.path.join(exp_folder, "Images", "Index.idx.xml"))
     xroot = xtree.getroot()
 
     images = xroot.findall("{http://www.perkinelmer.com/PEHH/HarmonyV5}Images")[0]
@@ -74,7 +74,7 @@ def xml2csv(exp_folder):
 
 
     # print(df.head())
-    df.to_csv(os.path.join(folder_raw, exp_folder, "metadata.csv"))
+    df.to_csv(os.path.join(exp_folder, "metadata.csv"))
 
     # print("cioa")
 
