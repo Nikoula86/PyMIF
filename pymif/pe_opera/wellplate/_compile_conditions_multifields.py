@@ -11,7 +11,7 @@ def compile_conditions_multifields(path,
                                           df,
                                           ffs):
     
-    ffs = [ff/np.mean(ff) for ff in ffs]
+    ffs = [ff/np.median(ff) if ff is not None else 1. for ff in ffs]
 
     # find out all wells
     wells = df.groupby(['row','col']).size().reset_index()
