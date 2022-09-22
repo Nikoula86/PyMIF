@@ -53,37 +53,44 @@ def compile_conditions_multifields(path,
             yidx = f.Yidx
             
             df_pos = df_well[(df_well.Xpos==x)&(df_well.Ypos==y)]
-
-            # print('Images foudn')
-            stack = []
-            for k, ch in enumerate(channel_order):
-                df_pos_ch = df_pos[df_pos.channel==ch]
-                df_pos_ch = df_pos_ch.sort_values(by='Zpos')
-                # [print(img_file) for img_file in df_pos_ch.filename]
-                # print([os.path.join(folder_raw,exp_folder,'Images',img_file) for img_file in df_pos_ch.filename])
-                stack_ch = np.stack([imread(os.path.join(path,img_file))/ffs[k] for img_file in df_pos_ch.filename])
-                stack.append(stack_ch)
-
-            # order channels
-            stacks = np.array(stack).astype(np.uint16)
-            stacks = np.swapaxes(stacks, 0, 1)
-
-            # create imagej metadata with LUTs
-            luts_dict = make_lut(luts_name)
-            # luts_dict = make_lut_old()
-            ijtags = imagej_metadata_tags({'LUTs': [luts_dict[lut_name] for lut_name in luts_name]}, '>')
             
-            outname = 'field%03d.tif'%j
+            # print('-'*50)
+            # print(df_pos)
+            
+            if len(df_pos)>0:
 
-            raw = pd.DataFrame({'tile_idx':[j],
-                                'filename':[outname],
-                                'row_idx':[yidx],
-                                'col_idx':[xidx]})
-            conversion = pd.concat([conversion,raw], ignore_index=True)
-
-            # print(outname)
-            imsave(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
-                            metadata={'mode': 'composite'}, extratags=ijtags, check_contrast=False)
+                # print('Images foudn')
+                stack = []
+                for k, ch in enumerate(channel_order):
+                    df_pos_ch = df_pos[df_pos.channel==(ch+1)]
+                    df_pos_ch = df_pos_ch.sort_values(by='Zpos')
+                    print('-'*25,'x:',xidx,'y:',yidx,'ch:',ch)
+                    print(df_pos_ch)
+                    # [print(img_file) for img_file in df_pos_ch.filename]
+                    # print([os.path.join(folder_raw,exp_folder,'Images',img_file) for img_file in df_pos_ch.filename])
+                    stack_ch = np.stack([imread(os.path.join(path,img_file))/ffs[k] for img_file in df_pos_ch.filename])
+                    stack.append(stack_ch)
+    
+                # order channels
+                stacks = np.array(stack).astype(np.uint16)
+                stacks = np.swapaxes(stacks, 0, 1)
+    
+                # create imagej metadata with LUTs
+                luts_dict = make_lut(luts_name)
+                # luts_dict = make_lut_old()
+                ijtags = imagej_metadata_tags({'LUTs': [luts_dict[lut_name] for lut_name in luts_name]}, '>')
+                
+                outname = 'field%03d.tif'%j
+    
+                raw = pd.DataFrame({'tile_idx':[j],
+                                    'filename':[outname],
+                                    'row_idx':[yidx],
+                                    'col_idx':[xidx]})
+                conversion = pd.concat([conversion,raw], ignore_index=True)
+    
+                # print(outname)
+                imsave(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
+                                metadata={'mode': 'composite'}, extratags=ijtags, check_contrast=False)
             
         conversion.to_csv(os.path.join(outpath, 'metadata.csv'))
             
