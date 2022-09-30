@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep 30 15:29:59 2022
+
+@author: gritti
+"""
+
 import sys, os
 import pandas as pd
 from skimage.io import imread
@@ -29,7 +36,7 @@ ffs = [
     # imread('AF647_ff.tif'),
 ]
 
-pe_opera.wellplate.compile_conditions_multifields(
+pe_opera.wellplate.compile_conditions_multifields_timelapse(
     path = os.path.join(exp_folder,'Images'), 
     channel_order = [1, 0], 
     luts_name = ['gray', 'green'], 
