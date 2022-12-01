@@ -105,6 +105,7 @@ def compile_conditions_multifields_timelapse(
                     conversion = pd.concat([conversion,raw], ignore_index=True)
         
                     # print(outname)
+                    # stacks shape: (T)CZYX
                     imsave(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
                                     metadata={'mode': 'composite'}, extratags=ijtags, check_contrast=False)
                 

@@ -3,10 +3,17 @@
 import numpy as np
 from skimage.io import imread, imsave
 import glob, os,  string, tqdm, time
+import pandas as pd
 from ...imagej_funs._make_lut import make_lut
 from ...imagej_funs._imagej_metadata_tags import imagej_metadata_tags
 
-def compile_conditions(path, conditions, channel_order, luts_name):
+def compile_conditions(path, 
+                        conditions, 
+                        channel_order, 
+                        luts_name,
+                        df,
+                        ffs):
+
     '''This function combines images of a 96WP acquired by PE.
 
     Parameters
@@ -28,71 +35,68 @@ def compile_conditions(path, conditions, channel_order, luts_name):
     NOTE:
     This script assume the experiment contains just one FOV per well!
     '''
-    # find all tiff files in the folder
-    flist = glob.glob(os.path.join(path,'*.tiff'))
-    flist.sort()
+    ffs = [ff/np.median(ff) if ff is not None else 1. for ff in ffs]
 
-    # find out all positions (the first 6 characters, e.g.: r01c01 )
-    pos = list(set( [os.path.split(f)[-1][:6] for f in flist] ))
-    pos.sort()
+    # find out all wells
+    wells = df.groupby(['row','col']).size().reset_index()    
 
     # define well id to convert e.g. r01c01 into A01
     d = dict(enumerate(string.ascii_uppercase, 1))
 
-    pbar = tqdm.tqdm(pos)
-    for p in pbar:
-        well = p[4:6]+d[int(p[1:3])]
-        cond = conditions[int(p[4:6])-1][int(p[1:3])-1]
 
-        pbar.set_description(p + ' ' + well + ' ' + cond)
+    pbar = tqdm.tqdm(wells.iterrows())
+    for p in pbar:
+        # print(p)
+        r = int(p[1].row)
+        c = int(p[1].col)
+        well = d[r]+'%02d'%c
+
+        conversion = pd.DataFrame({})
+        
+        cond = conditions[int(p[1].col)-1][int(p[1].row)-1]
+        
+        pbar.set_description(well + ' ' + cond)
         pbar.update()
         
         outpath = os.path.join(os.path.split(path)[0],'compiled',cond)
         if not os.path.exists(outpath):
-            os.makedirs(outpath)
+            os.makedirs(outpath)    
 
-        # extract all files from this well
-        flist = glob.glob(os.path.join(path,p+'*.tiff'))
-        flist.sort()
-
-        # extract all files from this timepoint
-        channels_list = glob.glob(os.path.join(path,p+'*'+'sk*fk*.tiff'))
-        channels_list.sort()
-
-        # find channels
-        channels = list(set([f[f.index('-ch')+3:f.index('-ch')+4] for f in channels_list]))
-        channels = np.array([int(ch) for ch in channels])
-        channels.sort()
-
-        stacks = []
-        for channel in channels:
-            # extract all files from this channel
-            stack_list = glob.glob(os.path.join(path,p+'*-ch'+str(channel)+'*sk*fk*.tiff'))
-            stack_list.sort()
-
+        df_well = df[(df.row==r)&(df.col==c)]
+        
+        if len(df_well)>0:
+            
             stack = []
-            for f in stack_list:
-                stack.append(imread(f))
-            stack = np.array(stack)
-            if stack.shape[0]==1:
-                stack = stack[0]
-            stacks.append(stack)
+            for k, ch in enumerate(channel_order):
+                df_pos_ch = df_well[df_well.channel==(ch+1)]
+                df_pos_ch = df_pos_ch.sort_values(by='Zpos')
+                
+                # print('-'*25,'ch:',ch)
+                # print(df_pos_ch)
+                
+                stack_ch = np.stack([imread(os.path.join(path,img_file))/ffs[k] for img_file in df_pos_ch.filename])
+                stack.append(stack_ch)
 
-        stacks = np.array(stacks).astype(np.uint16)
+            # order channels
+            stacks = np.array(stack).astype(np.uint16)
+            stacks = np.swapaxes(stacks, 0, 1)
 
-        # order channels
-        stacks = np.array([stacks[ch] for ch in channel_order]).astype(np.uint16)
-        if stacks.ndim == 4:
-            stacks = np.moveaxis(stacks,1,0)
-        # print(stacks.shape)
+            # create imagej metadata with LUTs
+            luts_dict = make_lut(luts_name)
+            # luts_dict = make_lut_old()
+            ijtags = imagej_metadata_tags({'LUTs': [luts_dict[lut_name] for lut_name in luts_name]}, '>')
 
-        # create imagej metadata with LUTs
-        luts_dict = make_lut(luts_name)
-        ijtags = imagej_metadata_tags({'LUTs': [luts_dict[i] for i in luts_name]}, '>')
+            outname = well+'.tif'
 
-        outname = well+'.tif'
-        imsave(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
-                        metadata={'mode': 'composite'}, extratags=ijtags)
+            raw = pd.DataFrame({'filename':[outname],
+                                'row_idx':[r],
+                                'col_idx':[c]})
+            conversion = pd.concat([conversion,raw], ignore_index=True)
+            
+            imsave(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
+                            metadata={'mode': 'composite'}, extratags=ijtags)
+
+    conversion.to_csv(os.path.join(outpath, 'metadata.csv'))
 
 
 ##########################################################################################

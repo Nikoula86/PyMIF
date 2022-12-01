@@ -92,7 +92,7 @@ def compile_conditions_multifields(path,
                 imsave(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
                                 metadata={'mode': 'composite'}, extratags=ijtags, check_contrast=False)
             
-        conversion.to_csv(os.path.join(outpath, 'metadata.csv'))
+    conversion.to_csv(os.path.join(outpath, 'metadata.csv'))
             
 
 

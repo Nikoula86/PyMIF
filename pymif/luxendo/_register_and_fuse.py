@@ -6,7 +6,7 @@ import os, glob, tqdm
 Assumes only 1 tile!
 '''
 
-def register_and_fuse(exp_folder, doFusion=True, doMIP=True, sigma=1.):
+def register_and_fuse(exp_folder, doFusion=True, doMIP=True, sigma=1., acquisition_direction='lowZ->highZ'):
 
     print('Processing ',folder)
 
@@ -43,7 +43,7 @@ def register_and_fuse(exp_folder, doFusion=True, doMIP=True, sigma=1.):
 
         x = np.arange(a.shape[0])
         X0 = np.max(x)/2.
-        r = np.clip((x-X0)/sigma,0,1000) # prevent overflow
+        r = np.clip((x-X0)/sigma,-1000,1000) # prevent overflow
 
         sigmoid1 = 1./(1.+np.exp(-r))
         sigmoid2 = 1.-sigmoid1
@@ -65,7 +65,10 @@ def register_and_fuse(exp_folder, doFusion=True, doMIP=True, sigma=1.):
             c = np.roll(c,dx,2)
             # print('fusing images channel %d'%i)
             # d = a*sigmoid1[:,np.newaxis,np.newaxis]+c*sigmoid2[:,np.newaxis,np.newaxis]
-            d = a*sigmoid1[:,np.newaxis,np.newaxis]+c*sigmoid2[:,np.newaxis,np.newaxis]
+            if acquisition_direction=='lowZ->highZ':
+                d = a*sigmoid1[:,np.newaxis,np.newaxis]+c*sigmoid2[:,np.newaxis,np.newaxis]
+            elif acquisition_direction=='highZ->lowZ':
+                d = a*sigmoid2[:,np.newaxis,np.newaxis]+c*sigmoid1[:,np.newaxis,np.newaxis]
             imsave(os.path.join(outfolder,'ch-%d_x00-y00_bin-%d%d1.tif'%(i,downscale,downscale)), d.astype(np.uint16), metadata={'axes': 'ZYX'}, check_contrast=False)
             # os.remove(os.path.join(master_folder,'ch%d_ang000.tif'%i))
             # os.remove(os.path.join(master_folder,'ch%d_ang180.tif'%i))
