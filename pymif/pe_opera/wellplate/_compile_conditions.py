@@ -45,13 +45,13 @@ def compile_conditions(path,
 
 
     pbar = tqdm.tqdm(wells.iterrows())
+    conversion = pd.DataFrame({})
     for p in pbar:
         # print(p)
         r = int(p[1].row)
         c = int(p[1].col)
         well = d[r]+'%02d'%c
 
-        conversion = pd.DataFrame({})
         
         cond = conditions[int(p[1].col)-1][int(p[1].row)-1]
         
