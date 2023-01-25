@@ -18,10 +18,7 @@ def isores(input_image, pixel_size, iso_res):
     print(input_image.shape)
     input_gpu = cle.push(input_image)
 
-    resampled_gpu = cle.create([int(input_gpu.shape[0] * pixel_size[0]/iso_res), 
-                            int(input_gpu.shape[1] * pixel_size[1]/iso_res), 
-                            int(input_gpu.shape[2] * pixel_size[2]/iso_res)])
-    cle.scale(input_gpu, resampled_gpu, 
+    resampled_gpu = cle.scale(input_gpu, resampled_gpu, 
               factor_x=pixel_size[2]/iso_res, 
               factor_y=pixel_size[1]/iso_res, 
               factor_z=pixel_size[0]/iso_res, 
