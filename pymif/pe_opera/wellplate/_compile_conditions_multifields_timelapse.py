@@ -83,8 +83,8 @@ def compile_conditions_multifields_timelapse(
                         print(df_pos_ch)
                         # [print(img_file) for img_file in df_pos_ch.filename]
                         # print([os.path.join(folder_raw,exp_folder,'Images',img_file) for img_file in df_pos_ch.filename])
-                        stack_ch = np.stack([imread(os.path.join(path,img_file))/ffs[k] for img_file in df_pos_ch.filename])
-                        stack.append(stack_ch)
+                        stack_ch = np.stack([imread(os.path.join(path,img_file))//ffs[k] for img_file in df_pos_ch.filename])
+                        stack.append(stack_ch.astype(np.uint16))
         
                     # order channels
                     stacks = np.array(stack).astype(np.uint16)
