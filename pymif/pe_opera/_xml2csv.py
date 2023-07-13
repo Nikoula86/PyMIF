@@ -10,7 +10,7 @@ def xml2csv(exp_folder):
     xroot = xtree.getroot()
 
     images = xroot.findall("{http://www.perkinelmer.com/PEHH/HarmonyV5}Images")[0]
-    print("images --> ", len(images))
+    print("Found %d images."%len(images))
 
 
     df = pd.DataFrame(
@@ -30,7 +30,7 @@ def xml2csv(exp_folder):
     )
 
 
-    for i, image in tqdm.tqdm(enumerate(images.iter("{http://www.perkinelmer.com/PEHH/HarmonyV5}Image"))):
+    for i, image in tqdm.tqdm(enumerate(images.iter("{http://www.perkinelmer.com/PEHH/HarmonyV5}Image")), total=len(images)):
         # print(image.tag, image.attrib)
 
         row = {}

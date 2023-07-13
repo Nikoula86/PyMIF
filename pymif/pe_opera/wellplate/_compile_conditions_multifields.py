@@ -13,6 +13,7 @@ def compile_conditions_multifields(
         df,
         ffs,
         ff_mode = 'PE', 
+        outfolder = 'compiled',
         ):
     # ff_mode: 'PE' for PE FF correction, use 'slide' for autofluorescence slide, use 'None' for no correction
     ffs = [1. for ff in ffs]
@@ -39,7 +40,7 @@ def compile_conditions_multifields(
         pbar.set_description(well)
         pbar.update()
         
-        outpath = os.path.join(path, 'compiled', well)
+        outpath = os.path.join(path, outfolder, well)
         if not os.path.exists(outpath):
             os.makedirs(outpath)
             

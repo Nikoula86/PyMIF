@@ -41,7 +41,8 @@ def extract_ffc_info(path, channel_order):
     assert len(channel_order) == len(channels), "channel_order must have same length as channel!"
 
     for i, ch in enumerate(channel_order):
-        info = ffs_info[ch]
+        ch_idx = channels.index(ch+1)
+        info = ffs_info[ch_idx]
     #     print(info)
         channel = int(re.findall("Channel: (\d+)", info)[0])
         channel_name = re.findall("ChannelName: (.*), Version", info)[0]

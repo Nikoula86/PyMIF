@@ -19,7 +19,8 @@ def compile_conditions_multifields_timelapse(
         luts_name, 
         df,
         ffs,
-        ff_mode = 'PE', 
+        ff_mode = 'PE',
+        outfolder = 'compiled' 
         ):    
     # ff_mode: 'PE' for PE FF correction, use 'slide' for autofluorescence slide, use 'None' for no correction
     ffs = [1. for ff in ffs]
@@ -46,7 +47,7 @@ def compile_conditions_multifields_timelapse(
         pbar.set_description(well)
         pbar.update()
         
-        outpath = os.path.join(path, 'compiled', well)
+        outpath = os.path.join(path, outfolder, well)
         if not os.path.exists(outpath):
             os.makedirs(outpath)
             
