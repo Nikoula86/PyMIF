@@ -6,13 +6,17 @@ import glob, os,  string, tqdm, time
 import pandas as pd
 from ...imagej_funs._make_lut import make_lut
 from ...imagej_funs._imagej_metadata_tags import imagej_metadata_tags
+from ..pe_io._extract_ffc_info import extract_ffc_info
 
-def compile_conditions(path, 
-                        conditions, 
-                        channel_order, 
-                        luts_name,
-                        df,
-                        ffs):
+def compile_conditions(
+        path, 
+        conditions, 
+        channel_order, 
+        luts_name,
+        df,
+        ffs,
+        ff_mode = 'PE', 
+        ):
 
     '''This function combines images of a 96WP acquired by PE.
 
@@ -35,7 +39,13 @@ def compile_conditions(path,
     NOTE:
     This script assume the experiment contains just one FOV per well!
     '''
-    ffs = [ff/np.median(ff) if ff is not None else 1. for ff in ffs]
+    # ff_mode: 'PE' for PE FF correction, use 'slide' for autofluorescence slide, use 'None' for no correction
+    ffs = [1. for ff in ffs]
+    if ff_mode == 'slide':
+        ffs = [ff/np.median(ff) if ff is not None else 1. for ff in ffs]
+    elif ff_mode == 'PE':
+        ffs_info = extract_ffc_info(path, channel_order)
+        ffs = [ff_info['ff_profile'] for ff_info in ffs_info]
 
     # find out all wells
     wells = df.groupby(['row','col']).size().reset_index()    

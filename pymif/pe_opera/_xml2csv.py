@@ -70,7 +70,7 @@ def xml2csv(exp_folder):
         x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ExposureTime")
         row["expTime"] = float(x.text)
 
-        df = df.append(pd.Series(row), ignore_index=True)
+        df = pd.concat([df, pd.Series(row).to_frame().T], ignore_index=True)
 
 
     # print(df.head())
