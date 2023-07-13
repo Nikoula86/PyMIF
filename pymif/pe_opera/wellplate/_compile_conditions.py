@@ -68,7 +68,7 @@ def compile_conditions(
         pbar.set_description(well + ' ' + cond)
         pbar.update()
         
-        outpath = os.path.join(os.path.split(path)[0],'compiled',cond)
+        outpath = os.path.join(path,'compiled',cond)
         if not os.path.exists(outpath):
             os.makedirs(outpath)    
 
@@ -84,7 +84,7 @@ def compile_conditions(
                 # print('-'*25,'ch:',ch)
                 # print(df_pos_ch)
                 
-                stack_ch = np.stack([imread(os.path.join(path,img_file))/ffs[k] for img_file in df_pos_ch.filename])
+                stack_ch = np.stack([imread(os.path.join(path,"Images","img_file))/ffs[k] for img_file in df_pos_ch.filename])
                 stack.append(stack_ch)
 
             # order channels
