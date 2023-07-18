@@ -20,7 +20,8 @@ def compile_conditions_multifields_timelapse(
         df,
         ffs,
         ff_mode = 'PE',
-        outfolder = 'compiled' 
+        outfolder = 'compiled',
+        image_folder = os.path.join("Images"), 
         ):    
     # ff_mode: 'PE' for PE FF correction, use 'slide' for autofluorescence slide, use 'None' for no correction
     ffs = [1. for ff in ffs]
@@ -91,7 +92,7 @@ def compile_conditions_multifields_timelapse(
                         print(df_pos_ch)
                         # [print(img_file) for img_file in df_pos_ch.filename]
                         # print([os.path.join(folder_raw,exp_folder,'Images',img_file) for img_file in df_pos_ch.filename])
-                        stack_ch = np.stack([imread(os.path.join(path,"Images",img_file))//ffs[k] for img_file in df_pos_ch.filename])
+                        stack_ch = np.stack([imread(os.path.join(path,image_folder,img_file))//ffs[k] for img_file in df_pos_ch.filename])
                         stack.append(stack_ch.astype(np.uint16))
         
                     # order channels

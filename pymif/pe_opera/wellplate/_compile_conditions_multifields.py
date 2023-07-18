@@ -12,19 +12,20 @@ def compile_conditions_multifields(
         luts_name, 
         df,
         ffs,
-        ff_mode = 'PE', 
-        outfolder = 'compiled',
+        ff_mode = "PE", 
+        outfolder = "compiled",
+        image_folder = os.path.join("Images"),
         ):
     # ff_mode: 'PE' for PE FF correction, use 'slide' for autofluorescence slide, use 'None' for no correction
     ffs = [1. for ff in ffs]
-    if ff_mode == 'slide':
+    if ff_mode == "slide":
         ffs = [ff/np.median(ff) if ff is not None else 1. for ff in ffs]
-    elif ff_mode == 'PE':
+    elif ff_mode == "PE":
         ffs_info = extract_ffc_info(path, channel_order)
-        ffs = [ff_info['ff_profile'] for ff_info in ffs_info]
+        ffs = [ff_info["ff_profile"] for ff_info in ffs_info]
 
     # find out all wells
-    wells = df.groupby(['row','col']).size().reset_index()
+    wells = df.groupby(["row","col"]).size().reset_index()
 
     # define well id to convert e.g. r01c01 into A01
     d = dict(enumerate(string.ascii_uppercase, 1))
@@ -33,7 +34,7 @@ def compile_conditions_multifields(
     for i, p in pbar:
         r = int(p.row)
         c = int(p.col)
-        well = d[r]+'%02d'%c
+        well = d[r]+"%02d"%c
         
         conversion = pd.DataFrame({})
 
@@ -47,14 +48,14 @@ def compile_conditions_multifields(
         df_well = df[(df.row==r)&(df.col==c)]
         
         # find all fields inside this well
-        fields = df_well.groupby(['Ypos','Xpos']).size().reset_index()
-        fields = fields.sort_values(by=['Ypos','Xpos'])
+        fields = df_well.groupby(["Ypos","Xpos"]).size().reset_index()
+        fields = fields.sort_values(by=["Ypos","Xpos"])
         l = list(set(fields.Ypos))
         l.sort()
-        fields['Yidx'] = [l.index(v) for v in fields.Ypos]
+        fields["Yidx"] = [l.index(v) for v in fields.Ypos]
         l = list(set(fields.Xpos))
         l.sort()
-        fields['Xidx'] = [l.index(v) for v in fields.Xpos]
+        fields["Xidx"] = [l.index(v) for v in fields.Xpos]
         
         for j, f in tqdm.tqdm(fields.iterrows(), total = len(fields)):
             x = f.Xpos
@@ -73,12 +74,12 @@ def compile_conditions_multifields(
                 stack = []
                 for k, ch in enumerate(channel_order):
                     df_pos_ch = df_pos[df_pos.channel==(ch+1)]
-                    df_pos_ch = df_pos_ch.sort_values(by='Zpos')
-                    print('-'*25,'x:',xidx,'y:',yidx,'ch:',ch)
+                    df_pos_ch = df_pos_ch.sort_values(by="Zpos")
+                    print("-"*25,"x:",xidx,"y:",yidx,"ch:",ch)
                     print(df_pos_ch)
                     # [print(img_file) for img_file in df_pos_ch.filename]
                     # print([os.path.join(folder_raw,exp_folder,'Images',img_file) for img_file in df_pos_ch.filename])
-                    stack_ch = np.stack([imread(os.path.join(path,"Images",img_file))//ffs[k] for img_file in df_pos_ch.filename])
+                    stack_ch = np.stack([imread(os.path.join(path,image_folder,img_file))//ffs[k] for img_file in df_pos_ch.filename])
                     stack.append(stack_ch.astype(np.uint16))
     
                 # order channels
@@ -88,21 +89,22 @@ def compile_conditions_multifields(
                 # create imagej metadata with LUTs
                 luts_dict = make_lut(luts_name)
                 # luts_dict = make_lut_old()
-                ijtags = imagej_metadata_tags({'LUTs': [luts_dict[lut_name] for lut_name in luts_name]}, '>')
+                ijtags = imagej_metadata_tags({"LUTs": [luts_dict[lut_name] for lut_name in luts_name]}, ">")
                 
-                outname = 'field%03d.tif'%j
+                outname = "field%03d.tif"%j
     
-                raw = pd.DataFrame({'tile_idx':[j],
-                                    'filename':[outname],
-                                    'row_idx':[yidx],
-                                    'col_idx':[xidx]})
+                raw = pd.DataFrame({"tile_idx":[j],
+                                    "filename":[outname],
+                                    "row_idx":[yidx],
+                                    "col_idx":[xidx]
+                                    })
                 conversion = pd.concat([conversion,raw], ignore_index=True)
     
                 # print(outname)
                 imsave(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
-                                metadata={'mode': 'composite'}, extratags=ijtags, check_contrast=False)
+                                metadata={"mode": "composite"}, extratags=ijtags, check_contrast=False)
             
-    conversion.to_csv(os.path.join(outpath, 'metadata.csv'))
+    conversion.to_csv(os.path.join(outpath, "metadata.csv"))
             
 
 

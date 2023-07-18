@@ -17,6 +17,7 @@ def compile_conditions(
         ffs,
         ff_mode = 'PE', 
         outfolder = 'compiled',
+        image_folder = os.path.join("Images"),
         ):
 
     '''This function combines images of a 96WP acquired by PE.
@@ -85,7 +86,7 @@ def compile_conditions(
                 # print('-'*25,'ch:',ch)
                 # print(df_pos_ch)
                 
-                stack_ch = np.stack([imread(os.path.join(path,"Images",img_file))/ffs[k] for img_file in df_pos_ch.filename])
+                stack_ch = np.stack([imread(os.path.join(path,image_folder,img_file))/ffs[k] for img_file in df_pos_ch.filename])
                 stack.append(stack_ch)
 
             # order channels

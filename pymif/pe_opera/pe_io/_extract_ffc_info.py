@@ -6,7 +6,7 @@ def compute_ff(ff_info, ch_name):
     print("Computing FF profile of channel %s ..."%ch_name)
 
     x_array = (np.arange(ff_info["profile_dims"][0]) - ff_info["profile_origin"][0])*ff_info["profile_scale"][0]
-    y_array = (np.arange(ff_info["profile_dims"][0]) - ff_info["profile_origin"][1])*ff_info["profile_scale"][1]
+    y_array = (np.arange(ff_info["profile_dims"][1]) - ff_info["profile_origin"][1])*ff_info["profile_scale"][1]
 
     x, y = np.meshgrid(x_array, y_array, copy=False)
 
