@@ -1,12 +1,14 @@
 import pandas as pd
 import xml.etree.ElementTree as et
 import tqdm
-import os
+import os, glob
 
 
-def xml2csv(exp_folder):
+def xml2csv(exp_folder,
+            image_folder = os.path.join("Images"),):
 
-    xtree = et.parse(os.path.join(exp_folder, "Images", "Index.idx.xml"))
+    xml_file = glob.glob(os.path.join(exp_folder, image_folder, "*.xml"))[0]
+    xtree = et.parse(xml_file)
     xroot = xtree.getroot()
 
     images = xroot.findall("{http://www.perkinelmer.com/PEHH/HarmonyV5}Images")[0]
