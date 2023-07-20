@@ -5,7 +5,8 @@ import os, glob
 
 
 def xml2csv(exp_folder,
-            image_folder = os.path.join("Images"),):
+            image_folder = os.path.join("Images"),
+            meta_file_name = "metadata.csv"):
 
     xml_file = glob.glob(os.path.join(exp_folder, image_folder, "*.xml"))[0]
     xtree = et.parse(xml_file)
@@ -76,7 +77,7 @@ def xml2csv(exp_folder,
 
 
     # print(df.head())
-    df.to_csv(os.path.join(exp_folder, "metadata.csv"))
+    df.to_csv(os.path.join(exp_folder, meta_file_name))
 
     # print("cioa")
 
