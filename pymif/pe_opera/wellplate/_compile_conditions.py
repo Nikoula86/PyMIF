@@ -91,12 +91,9 @@ def compile_conditions(
                 stack_ch = np.stack([rescale(imread(os.path.join(path,image_folder,img_file))/ffs[k], [downsample, downsample], order=1, preserve_range=True, anti_aliasing=True) for img_file in df_pos_ch.filename])
 
                 stack.append(stack_ch)
-                print(k,[s.shape for s in stack])
 
             # order channels
-            print([s.shape for s in stack])
             stacks = np.stack(stack).astype(np.uint16)
-            print(stacks.shape)
 
             if which_proj=='mip':
                 tosave = []
@@ -118,7 +115,6 @@ def compile_conditions(
                 tosave = np.swapaxes(stacks, 0, 1).astype(np.uint16)
 
             # tosave = np.moveaxis(tosave,0,-1)
-            print(tosave.shape)
             tosave = tosave.astype(np.uint16)
 
             # create imagej metadata with LUTs
