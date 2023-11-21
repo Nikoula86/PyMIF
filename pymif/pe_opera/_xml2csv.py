@@ -6,15 +6,16 @@ import os, glob
 
 def xml2csv(exp_folder,
             image_folder = os.path.join("Images"),
-            meta_file_name = "metadata.csv"):
+            meta_file_name = "metadata.csv",
+            save = True):
 
+    # print(os.path.join(exp_folder, image_folder, "*.xml"))
     xml_file = glob.glob(os.path.join(exp_folder, image_folder, "*.xml"))[0]
     xtree = et.parse(xml_file)
     xroot = xtree.getroot()
 
     images = xroot.findall("{http://www.perkinelmer.com/PEHH/HarmonyV5}Images")[0]
     print("Found %d images."%len(images))
-
 
     df = pd.DataFrame(
         {
@@ -61,45 +62,49 @@ def xml2csv(exp_folder,
         x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}PlaneID")
         row["plane"] = int(x.text)
 
-        x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ChannelID")
-        row["channel"] = int(x.text)
-
         x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}TimepointID")
         row["timepoint"] = int(x.text)
+
+        x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ChannelID")
+        row["channel"] = int(x.text)
 
         x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ChannelName")
         row["chName"] = x.text
 
+        x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ChannelType")
+        row["chType"] = x.text
+
+        x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}MainExcitationWavelength")
+        row["chWavelength"] = x.text
+
         x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ExposureTime")
         row["expTime"] = float(x.text)
+
+        x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ImageResolutionX")
+        row["pixelSize"] = float(x.text)
 
         df = pd.concat([df, pd.Series(row).to_frame().T], ignore_index=True)
 
 
     # print(df.head())
-    df.to_csv(os.path.join(exp_folder, meta_file_name))
+    if save:
+        df.to_csv(os.path.join(exp_folder, meta_file_name))
 
-    # print("cioa")
+    return df
 
-#####################@###############################################################
+#####################################################################################
 
 if __name__ == '__main__':
     #####################
 
-    ### mac gio
-    # path = "/Volumes/sharpe/data/Vascular_micromass/Opera/TIMELAPSE/" "Timelapse4_041021/"
-    # folder_raw = os.path.join(path)
-
     ### windows nicola
-    path = os.path.join('data','Vascular_micromass','Opera','TIMELAPSE','Timelapse4_041021')
-    folder_raw = os.path.join("X:", os.sep, path)
+    # exp_folder = "/g/trivedi/Kristina_Stapornwongkul/ImageAnalysis/gastr_hcr_volumes/data/primary/date-20220304_hpa-96_plate-1_exp-1"
+    exp_folder = "PATH-TO-EXPERIMENT"
 
-    exp_folder = os.path.join(
-        "gio_Pecam-Sox9_20x-24h_041021__2021-10-04T16_06_44-Measurement_1"
-    )
-
-    # print(folder_raw)
-    # print(exp_folder)
+    xml2csv(exp_folder,
+        image_folder = "Images",
+        meta_file_name = "metadata_PE.csv",
+        save = True) 
 
     #####################
 

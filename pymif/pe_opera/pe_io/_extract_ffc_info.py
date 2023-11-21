@@ -26,13 +26,10 @@ def compute_ff(ff_info, ch_name):
 def extract_ffc_info(path, channel_order):
 
     print('Extracting FFC info from xml file...')
-    FFC_profile_path = os.path.join(path,"FFC_Profile")
 
-    assert os.path.exists(FFC_profile_path), "FFC_Profile path not found!"
-
-    xml_doc = xml.dom.minidom.parse(os.path.join(FFC_profile_path,'FFC_Profile_Measurement 1.xml'))
+    xml_doc = xml.dom.minidom.parse(os.path.join(path,"Images",'Index.idx.xml'))
     
-    entries = xml_doc.getElementsByTagName('Results')[0].getElementsByTagName('Map')[0].getElementsByTagName('Entry')
+    entries = xml_doc.getElementsByTagName('Maps')[0].getElementsByTagName('Map')[0].getElementsByTagName('Entry')
     channels = [int(entry.getAttribute('ChannelID')) for entry in entries]
     ffs_info = [entry.getElementsByTagName('FlatfieldProfile')[0].childNodes[0].data for entry in entries]
 
@@ -60,12 +57,20 @@ def extract_ffc_info(path, channel_order):
             nonflatness_original = float(re.findall("Original: (\d+.\d+),", info)[0])
             nonflatness_random = float(re.findall("Random: (\d+.\d+)", info)[0])
             coeff_str = re.findall("Coefficients: (.*), Dims", info)[0][1:-1]
+            if ", Dims" in coeff_str:
+                coeff_str = re.findall("(.*), Dims", coeff_str)[0][:-1]
             profile_coeffs = [[float(a) for a in l.split(", ")] for l in re.findall(r"[^[]*\[([^]]*)\]", coeff_str)]
             dims_str = re.findall(", Dims: (.*), Origin", info)[0][1:-1]
+            if ", Origin" in dims_str:
+                dims_str = re.findall("(.*), Origin", dims_str)[0][:-1]
             profile_dims = [int(a) for a in dims_str.split(", ")]
             origin_str = re.findall(", Origin: (.*), Scale", info)[0][1:-1]
+            if ", Scale" in origin_str:
+                origin_str = re.findall("(.*), Scale", origin_str)[0][:-1]
             profile_origin = [float(a) for a in origin_str.split(", ")]
             scale_str = re.findall(", Scale: (.*), Type", info)[0][1:-1]
+            if ", Type" in scale_str:
+                scale_str = re.findall("(.*), Type", scale_str)[0][:-1]
             profile_scale = [float(a) for a in scale_str.split(", ")]
             ff_dict['mean'] = mean
             ff_dict['noiseconst'] = noiseconst

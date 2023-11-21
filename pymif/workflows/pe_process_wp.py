@@ -16,20 +16,19 @@ Finally, compile experimental images using flat field correction
 '''
 df = pd.read_csv(os.path.join(exp_folder,'metadata.csv'))
 
-ffs = [
-    None,
-    None,
-    None
-]
-
 conditions = [['alldoxy' for i in range(8)] for j in range(12)]
 
 pe_opera.wellplate.compile_conditions(
-    path = os.path.join(exp_folder,'Images'), 
-    conditions = conditions,
-    channel_order = [1, 2, 0], 
-    luts_name = ['gray', 'green', 'orange'], 
-    df = df,
-    ffs = ffs
+        path=exp_folder, 
+        conditions=conditions, 
+        channel_order=[1,2,0], 
+        luts_name=["gray","green","orange"],
+        df=df,
+        ffs=None,
+        downsample=1.,
+        ff_mode = 'PE', 
+        outfolder = 'compiled',
+        image_folder = os.path.join("Images"),
+        which_proj = 'none',
 )
 
