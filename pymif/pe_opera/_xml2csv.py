@@ -5,7 +5,7 @@ import os, glob
 
 
 def xml2csv(exp_folder,
-            image_folder = os.path.join("Images"),
+            image_folder = "Images",
             meta_file_name = "metadata.csv",
             save = True):
 
@@ -81,7 +81,7 @@ def xml2csv(exp_folder,
         row["expTime"] = float(x.text)
 
         x = image.find("{http://www.perkinelmer.com/PEHH/HarmonyV5}ImageResolutionX")
-        row["pixelSize"] = float(x.text)
+        row["pixelSize"] = float(x.text)*1e6
 
         df = pd.concat([df, pd.Series(row).to_frame().T], ignore_index=True)
 

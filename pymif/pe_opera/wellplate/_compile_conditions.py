@@ -1,7 +1,7 @@
 import numpy as np
-from skimage.io import imread
-from skimage.transform import rescale
+from skimage.io import imread, imsave
 import tifffile
+from skimage.transform import rescale
 import  os, string, tqdm
 import pandas as pd
 from ...imagej_funs._make_lut import make_lut
@@ -88,11 +88,16 @@ def compile_conditions(
                 # print('-'*25,'ch:',ch)
                 # print(df_pos_ch)
                 
-                stack_ch = np.stack([imread(os.path.join(path,image_folder,img_file))/ffs[k] for img_file in df_pos_ch.filename])
+                stack_ch = np.stack([rescale(imread(os.path.join(path,image_folder,img_file))/ffs[k], [downsample, downsample], order=1, preserve_range=True, anti_aliasing=True) for img_file in df_pos_ch.filename])
+
                 stack.append(stack_ch)
+                print(k,[s.shape for s in stack])
 
             # order channels
-            stacks = np.array(stack).astype(np.uint16)
+            print([s.shape for s in stack])
+            stacks = np.stack(stack).astype(np.uint16)
+            print(stacks.shape)
+
             if which_proj=='mip':
                 tosave = []
                 for k, s in enumerate(stacks):
@@ -109,9 +114,11 @@ def compile_conditions(
                     else:
                         tosave.append(np.mean(s, 0))
                 tosave = np.stack(tosave).astype(np.uint16)
-            else:
+            else: 
                 tosave = np.swapaxes(stacks, 0, 1).astype(np.uint16)
-            tosave = rescale(tosave, (1,*[downsample for y in range(tosave.ndim-1)]), order=1, preserve_range=True, anti_aliasing=True)
+
+            # tosave = np.moveaxis(tosave,0,-1)
+            print(tosave.shape)
             tosave = tosave.astype(np.uint16)
 
             # create imagej metadata with LUTs
@@ -126,7 +133,7 @@ def compile_conditions(
                                 'col_idx':[c]})
             conversion = pd.concat([conversion,raw], ignore_index=True)
             
-            tifffile.imwrite(os.path.join(outpath,outname),stacks, byteorder='>', imagej=True,
+            tifffile.imwrite(os.path.join(outpath,outname), tosave, byteorder='>', imagej=True,
                             metadata={'mode': 'composite'}, extratags=ijtags)
 
     conversion.to_csv(os.path.join(path,outfolder, 'metadata.csv'))
