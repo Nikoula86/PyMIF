@@ -65,7 +65,6 @@ def compile_conditions(
         r = int(p[1].row)
         c = int(p[1].col)
         well = d[r]+'%02d'%c
-
         
         cond = conditions[int(p[1].col)-1][int(p[1].row)-1]
         
@@ -77,6 +76,7 @@ def compile_conditions(
             os.makedirs(outpath)    
 
         df_well = df[(df.row==r)&(df.col==c)]
+        # print(df_well)
         
         if len(df_well)>0:
             
@@ -126,10 +126,22 @@ def compile_conditions(
 
             raw = pd.DataFrame({'filename':[outname],
                                 'row_idx':[r],
-                                'col_idx':[c]})
+                                'col_idx':[c],
+                                'condition':cond,
+                                'pixelSize':df_well.pixelSize.values[0],
+                                })
+            for k, ch in enumerate(channel_order):
+                raw["ch%d_name"%k] = df_well.chName.values[ch]
+                raw["ch%d_wavelength"%k] = df_well.chWavelength.values[ch]
+
             conversion = pd.concat([conversion,raw], ignore_index=True)
-            
+
             tifffile.imwrite(os.path.join(outpath,outname), tosave, byteorder='>', imagej=True,
-                            metadata={'mode': 'composite'}, extratags=ijtags)
+                            resolution=(1./df_well.pixelSize.values[0],1./df_well.pixelSize.values[0]),
+                            metadata={
+                                'mode': 'composite', 
+                                'unit': 'um',
+                                }, 
+                            extratags=ijtags)
 
     conversion.to_csv(os.path.join(path,outfolder, 'metadata.csv'))
