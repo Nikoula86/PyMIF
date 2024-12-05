@@ -7,6 +7,7 @@ Created on Fri Sep 30 15:23:19 2022
 
 import numpy as np
 from skimage.io import imread, imsave
+from skimage.transform import rescale
 import os, string, tqdm
 import pandas as pd
 from ...imagej_funs._make_lut import make_lut
@@ -18,18 +19,20 @@ def compile_conditions_multifields_timelapse(
         channel_order, 
         luts_name, 
         df,
-        ffs,
         ff_mode = 'PE',
-        outfolder = 'compiled',
+        ffs=None,
+        downsample=1.,
         image_folder = os.path.join("Images"), 
+        outfolder = 'compiled',
         ):    
     # ff_mode: 'PE' for PE FF correction, use 'slide' for autofluorescence slide, use 'None' for no correction
-    ffs = [1. for ff in ffs]
-    if ff_mode == 'slide':
-        ffs = [ff/np.median(ff) if ff is not None else 1. for ff in ffs]
-    elif ff_mode == 'PE':
+    if ff_mode == "slide":
+        ffs = [ffs[i]/np.median(ffs[i]) if ffs[i] is not None else 1. for i in range(len(channel_order))]
+    elif ff_mode == "PE":
         ffs_info = extract_ffc_info(path, channel_order)
-        ffs = [ff_info['ff_profile'] for ff_info in ffs_info]
+        ffs = [ff_info["ff_profile"] for ff_info in ffs_info]
+    else:
+        ffs = [1. for i in channel_order]
 
     # find out all wells
     wells = df.groupby(['row','col']).size().reset_index()
@@ -92,7 +95,7 @@ def compile_conditions_multifields_timelapse(
                         print(df_pos_ch)
                         # [print(img_file) for img_file in df_pos_ch.filename]
                         # print([os.path.join(folder_raw,exp_folder,'Images',img_file) for img_file in df_pos_ch.filename])
-                        stack_ch = np.stack([imread(os.path.join(path,image_folder,img_file))//ffs[k] for img_file in df_pos_ch.filename])
+                        stack_ch = np.stack([rescale(imread(os.path.join(path,image_folder,img_file))/ffs[k], [downsample, downsample], order=1, preserve_range=True, anti_aliasing=True) for img_file in df_pos_ch.filename])
                         stack.append(stack_ch.astype(np.uint16))
         
                     # order channels

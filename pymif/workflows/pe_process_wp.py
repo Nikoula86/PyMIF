@@ -9,22 +9,24 @@ exp_folder = 'Y:\\Krisztina Arato\\results\\PE\\20221110\\KrA-20221110-alldoxy__
 '''
 First, create the csv file for image bookeeping
 '''
-# pe_opera.xml2csv(exp_folder)
+pe_opera.xml2csv(exp_folder,
+        image_folder = os.path.join("Images"),
+        meta_file_name = "metadata_PE.csv",
+        save = True)
 
 '''
 Finally, compile experimental images using flat field correction
 '''
-df = pd.read_csv(os.path.join(exp_folder,'metadata.csv'))
-
+df = pd.read_csv(os.path.join(exp_folder,'metadata_PE.csv'))
+channel_order = pe_opera.pe_io.extract_channel_order(df) # [1,2,0]
 conditions = [['alldoxy' for i in range(8)] for j in range(12)]
 
 pe_opera.wellplate.compile_conditions(
         path=exp_folder, 
         conditions=conditions, 
-        channel_order=[1,2,0], 
-        luts_name=["gray","green","orange"],
+        channel_order=channel_order, 
+        luts_name=["white","lime","orange"],
         df=df,
-        ffs=None,
         downsample=1.,
         ff_mode = 'PE', 
         outfolder = 'compiled',

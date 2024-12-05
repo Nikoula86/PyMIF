@@ -14,11 +14,11 @@ def compile_conditions(
         channel_order, 
         luts_name,
         df,
-        ffs,
-        downsample=1.,
         ff_mode = 'PE', 
-        outfolder = 'compiled',
+        ffs=None,
+        downsample=1.,
         image_folder = os.path.join("Images"),
+        outfolder = 'compiled',
         which_proj = 'none',
         ):
 
@@ -44,12 +44,13 @@ def compile_conditions(
     This script assume the experiment contains just one FOV per well!
     '''
     # ff_mode: 'PE' for PE FF correction, use 'slide' for autofluorescence slide, use 'None' for no correction
-    ffs = [1. for ff in ffs]
-    if ff_mode == 'slide':
-        ffs = [ff/np.median(ff) if ff is not None else 1. for ff in ffs]
-    elif ff_mode == 'PE':
+    if ff_mode == "slide":
+        ffs = [ffs[i]/np.median(ffs[i]) if ffs[i] is not None else 1. for i in range(len(channel_order))]
+    elif ff_mode == "PE":
         ffs_info = extract_ffc_info(path, channel_order)
-        ffs = [ff_info['ff_profile'] for ff_info in ffs_info]
+        ffs = [ff_info["ff_profile"] for ff_info in ffs_info]
+    else:
+        ffs = [1. for i in channel_order]
 
     # find out all wells
     wells = df.groupby(['row','col']).size().reset_index()    

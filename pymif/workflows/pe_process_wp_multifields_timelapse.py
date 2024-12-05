@@ -17,29 +17,25 @@ exp_folder = 'Y:\\Nick Marschlich\\EMBL_Barcelona\\Imaging\\Opera PE\\P3_Metabol
 '''
 First, create the csv file for image bookeeping
 '''
-# pe_opera.xml2csv(exp_folder)
-# pe_opera.xml2csv(ff_folder)
+pe_opera.xml2csv(exp_folder,
+        image_folder = os.path.join("Images"),
+        meta_file_name = "metadata_PE.csv",
+        save = True)
 
 '''
 Next, create the FF images with ImageJ manually....
 
 Finally, compile experimental images using flat field correction
 '''
-df = pd.read_csv(os.path.join(exp_folder,'metadata.csv'))
-
-ffs = [
-    None,
-    None
-    # imread('DAPI_ff.tif'),
-    # imread('AF488_ff.tif'),
-    # imread('AF561_ff.tif'),
-    # imread('AF647_ff.tif'),
-]
+df = pd.read_csv(os.path.join(exp_folder,'metadata_PE.csv'))
+channel_order = pe_opera.pe_io.extract_channel_order(df) # [1,0]
 
 pe_opera.wellplate.compile_conditions_multifields_timelapse(
-    path = os.path.join(exp_folder,'Images'), 
-    channel_order = [1, 0], 
-    luts_name = ['gray', 'green'], 
-    df = df,
-    ffs = ffs
+        path = exp_folder, 
+        channel_order = channel_order, 
+        luts_name = ['white', 'lime'], 
+        df = df,
+        downsample=1.,
+        ff_mode = "PE",
+        image_folder = os.path.join("Images"),
 )

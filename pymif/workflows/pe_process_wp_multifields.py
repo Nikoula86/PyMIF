@@ -11,30 +11,25 @@ exp_folder = "W:\\people\\gritti\\projects\\pe_opera\\ff_correction\\data\\20230
 '''
 First, create the csv file for image bookeeping
 '''
-# pe_opera.xml2csv(exp_folder)
-# pe_opera.xml2csv(ff_folder)
+pe_opera.xml2csv(exp_folder,
+        image_folder = os.path.join("Images"),
+        meta_file_name = "metadata_PE.csv",
+        save = True)
 
 '''
 Next, create the FF images with ImageJ manually....
 
 Finally, compile experimental images using flat field correction
 '''
-df = pd.read_csv(os.path.join(exp_folder,"metadata.csv"))
-
-ffs = [
-    None,
-    None
-    # imread('DAPI_ff.tif'),
-    # imread('AF488_ff.tif'),
-    # imread('AF561_ff.tif'),
-    # imread('AF647_ff.tif'),
-]
+df = pd.read_csv(os.path.join(exp_folder,'metadata_PE.csv'))
+channel_order = pe_opera.pe_io.extract_channel_order(df) # [4,2,0,3,1]
 
 pe_opera.wellplate.compile_conditions_multifields(
-    path = exp_folder, 
-    channel_order = [4,2,0,3,1], 
-    luts_name = ["blue", "cyan", "green", "orange", "red"], 
-    df = df,
-    ff_mode = "PE",
-    ffs = ffs
+        path = exp_folder, 
+        channel_order = channel_order, 
+        luts_name = ["blue", "cyan", "green", "orange", "red"], 
+        df = df,
+        downsample=1.,
+        ff_mode = "PE",
+        image_folder = os.path.join("Images"),
 )
